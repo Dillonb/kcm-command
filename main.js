@@ -10,7 +10,7 @@ import {fromLonLat} from 'ol/proj';
 async function f() {
   const source = new VectorSource();
 
-  const vehiclepositions_url = "vehiclepositions_pb.json";
+  const vehiclepositions_url = "/vehiclepositions_pb.json";
   const response = await fetch(vehiclepositions_url);
   const vehiclepositions = await response.json();
 
