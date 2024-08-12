@@ -13,7 +13,7 @@
   "dependencies": {
     "csv-parser": "^3.0.0",
     "express": "^4.19.2",
-    "ol": "7.1.0",
+    "ol": "10.0.0",
     "vite-express": "^0.18.0"
   }
 }
