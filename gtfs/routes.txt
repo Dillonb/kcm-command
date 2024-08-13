@@ -96,7 +96,6 @@ route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_
 100345,1,"987","","Rainier Beach - Lakeside School",3,https://kingcounty.gov/en/dept/metro/routes-and-service/schedules-and-maps/987.html,,
 100346,1,"988","","Madrona - Lakeside School",3,https://kingcounty.gov/en/dept/metro/routes-and-service/schedules-and-maps/988.html,,
 100347,1,"989","","Eastgate - Lakeside School",3,https://kingcounty.gov/en/dept/metro/routes-and-service/schedules-and-maps/989.html,,
-100349,1,"992","","Redmond Techonology Station - Lakeside School",3,https://kingcounty.gov/en/dept/metro/routes-and-service/schedules-and-maps/992.html,,
 100350,1,"994","","Downtown Seattle - Lakeside School",3,https://kingcounty.gov/en/dept/metro/routes-and-service/schedules-and-maps/994.html,,
 100447,1,"49","","Univ District - Broadway - Downtown Seattle",3,https://kingcounty.gov/en/dept/metro/routes-and-service/schedules-and-maps/049.html,,
 100451,40,"556","","Issaquah-University District",3,https://www.soundtransit.org/556,2B376E,FFFFFF
