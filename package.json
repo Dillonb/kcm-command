@@ -8,12 +8,12 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "vite": "^5.4.0"
+    "vite": "^5.4.21"
   },
   "dependencies": {
     "csv-parser": "^3.0.0",
-    "express": "^4.19.2",
+    "express": "^4.22.1",
     "leaflet": "^1.9.4",
-    "vite-express": "^0.18.0"
+    "vite-express": "^0.19.0"
   }
 }
