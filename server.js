@@ -2,6 +2,7 @@ import express from "express";
 import ViteExpress from "vite-express";
 import parse from 'csv-parser';
 import * as fs from 'fs';
+import { indexStopsById, indexStopTimesByTrip } from './lib.js';
 
 function parseCsv(file) {
     return new Promise((resolve) => {
@@ -20,25 +21,10 @@ const routes = await parseCsv("gtfs/routes.txt");
 const trips = await parseCsv("gtfs/trips.txt");
 
 const stopsRaw = await parseCsv("gtfs/stops.txt");
-const stopsById = {};
-stopsRaw.forEach(s => { stopsById[s.stop_id] = s.stop_name; });
+const stopsById = indexStopsById(stopsRaw);
 
 const stopTimesRaw = await parseCsv("gtfs/stop_times.txt");
-const stopTimesByTrip = {};
-stopTimesRaw.forEach(st => {
-    if (!stopTimesByTrip[st.trip_id]) stopTimesByTrip[st.trip_id] = [];
-    stopTimesByTrip[st.trip_id].push({
-        arrival_time: st.arrival_time,
-        departure_time: st.departure_time,
-        stop_id: st.stop_id,
-        stop_sequence: Number(st.stop_sequence),
-        stop_name: stopsById[st.stop_id] || st.stop_id,
-    });
-});
-// sort each trip's stops by sequence
-for (const tid in stopTimesByTrip) {
-    stopTimesByTrip[tid].sort((a, b) => a.stop_sequence - b.stop_sequence);
-}
+const stopTimesByTrip = indexStopTimesByTrip(stopTimesRaw, stopsById);
 console.log(`Indexed stop_times for ${Object.keys(stopTimesByTrip).length} trips`);
 
 const app = express();

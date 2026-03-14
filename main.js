@@ -1,5 +1,6 @@
 import './style.css';
 import L from 'leaflet';
+import { formatTime, buildTimetableHtml } from './lib.js';
 
 let map;
 let markersLayer;
@@ -120,31 +121,6 @@ async function refreshPoints() {
 
   lastRefresh = Date.now();
   updateStatus();
-}
-
-function formatTime(timeStr) {
-  const [h, m] = timeStr.split(':');
-  let hour = parseInt(h, 10);
-  const suffix = hour >= 12 ? 'PM' : 'AM';
-  if (hour > 12) hour -= 12;
-  if (hour === 0) hour = 12;
-  return `${hour}:${m} ${suffix}`;
-}
-
-function buildTimetableHtml(stops, currentStopSeq, currentStatus, label) {
-  let rows = '';
-  stops.forEach(stop => {
-    const seq = stop.stop_sequence;
-    let cls = '';
-    if (currentStatus === 'STOPPED_AT' && seq === currentStopSeq) {
-      cls = 'stop-current';
-    } else if (currentStatus === 'IN_TRANSIT_TO') {
-      if (seq === currentStopSeq - 1) cls = 'stop-previous';
-      else if (seq === currentStopSeq) cls = 'stop-next';
-    }
-    rows += `<tr class="${cls}"><td class="tt-time">${formatTime(stop.arrival_time)}</td><td>${stop.stop_name}</td></tr>`;
-  });
-  return `<div class="timetable-popup"><div class="tt-header">${label.replace('\n', '<br>')}</div><div class="tt-scroll"><table>${rows}</table></div></div>`;
 }
 
 function attachPopup(marker, popupData) {
