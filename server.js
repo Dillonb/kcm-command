@@ -4,6 +4,11 @@ import parse from 'csv-parser';
 import * as fs from 'fs';
 import { indexStopsById, indexStopTimesByTrip } from './lib.js';
 
+function log(msg) {
+    const time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+    console.log(`${time} [kcm] ${msg}`);
+}
+
 function parseCsv(file) {
     return new Promise((resolve) => {
         const results = [];
@@ -11,7 +16,7 @@ function parseCsv(file) {
             .pipe(parse())
             .on('data', (data) => results.push(data))
             .on('end', () => {
-                console.log("Loaded csv file from " + file);
+                log("Loaded csv file from " + file);
                 resolve(results);
             });
     });
@@ -25,12 +30,12 @@ const stopsById = indexStopsById(stopsRaw);
 
 const stopTimesRaw = await parseCsv("gtfs/stop_times.txt");
 const stopTimesByTrip = indexStopTimesByTrip(stopTimesRaw, stopsById);
-console.log(`Indexed stop_times for ${Object.keys(stopTimesByTrip).length} trips`);
+log(`Indexed stop_times for ${Object.keys(stopTimesByTrip).length} trips`);
 
 const app = express();
 
 app.get('/vehiclepositions_pb.json', async function (req, res) {
-    console.log("fetching vehiclepositions_pb.json");
+    log("Fetching vehiclepositions_pb.json");
     const response = await fetch("https://s3.amazonaws.com/kcm-alerts-realtime-prod/vehiclepositions_pb.json");
     const data = await response.json();
     res.send(data)
@@ -45,4 +50,4 @@ app.get('/trip_stops/:tripId.json', function (req, res) {
     res.json(stops);
 });
 
-ViteExpress.listen(app, 3000, () => console.log("Server is listening: http://localhost:3000/"));
+ViteExpress.listen(app, 3000, () => log("Server is listening: http://localhost:3000/"));
