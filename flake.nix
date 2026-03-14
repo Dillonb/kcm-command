@@ -12,7 +12,7 @@
         default = pkgs.${system}.mkShell {
           buildInputs = with pkgs.${system}; [
             bashInteractive
-            nodejs_20
+            nodejs_22
           ];
         };
       });
