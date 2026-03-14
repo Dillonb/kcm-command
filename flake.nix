@@ -11,6 +11,7 @@
       devShells = forAllSystems (system: {
         default = pkgs.${system}.mkShell {
           buildInputs = with pkgs.${system}; [
+            bashInteractive
             nodejs_20
           ];
         };
