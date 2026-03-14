@@ -81,6 +81,12 @@ html, body {
 .stop-current td:first-child::before {
   content: "● ";
 }
+.route-icon.streetcar {
+  background: linear-gradient(135deg, #F47836, #d45f1e);
+}
+.route-icon.streetcar svg {
+  display: block;
+}
 #status {
   position: absolute;
   top: 10px;

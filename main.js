@@ -71,10 +71,22 @@ async function refreshPoints() {
     const currentStopSeq = vehicleposition.vehicle.current_stop_sequence;
     const currentStatus = vehicleposition.vehicle.current_status;
 
+    const isStreetcar = route["route_type"] === "0";
     const routeNum = route["route_short_name"]?.replace(" Line", "") || "";
+
+    let iconClass = 'route-icon';
+    let iconHtml;
+    if (isStreetcar) {
+      iconClass += ' streetcar';
+      iconHtml = '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M12 2C8 2 4 2.5 4 6v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2l2-2h4l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-4-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM18 11H6V6h12v5z"/></svg>';
+    } else {
+      if (isRapidRide) iconClass += ' rapidride';
+      iconHtml = `<span>${routeNum}</span>`;
+    }
+
     const icon = L.divIcon({
-      className: isRapidRide ? 'route-icon rapidride' : 'route-icon',
-      html: `<span>${routeNum}</span>`,
+      className: iconClass,
+      html: iconHtml,
       iconSize: [26, 26],
       iconAnchor: [13, 13],
     });
