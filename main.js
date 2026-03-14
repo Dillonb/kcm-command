@@ -1,20 +1,13 @@
 import './style.css';
-import {Feature, Map, View} from 'ol';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-import WebGLPointsLayer from 'ol/layer/WebGLPoints.js';
-import Point from 'ol/geom/Point';
-import {Vector as VectorSource} from 'ol/source';
-import {fromLonLat} from 'ol/proj';
+import L from 'leaflet';
 
 let map;
-let pointsLayer;
+let markersLayer;
 let routes;
 let trips;
 
 async function fetchRoutes() {
-  const routes_url = "/routes.json";
-  const response = await fetch(routes_url);
+  const response = await fetch("/routes.json");
   const routesList = await response.json();
   let routesById = {};
   routesList.forEach(route => {
@@ -24,8 +17,7 @@ async function fetchRoutes() {
 }
 
 async function fetchTrips() {
-  const trips_url = "/trips.json";
-  const response = await fetch(trips_url);
+  const response = await fetch("/trips.json");
   const tripsList = await response.json();
   let tripsById = {};
   tripsList.forEach(trip => {
@@ -40,106 +32,72 @@ async function fetchTrips() {
   return tripsById;
 }
 
-async function generatePointsLayer() {
-  const source = new VectorSource();
+let lastRefresh = null;
+const REFRESH_INTERVAL = 10;
 
-  const vehiclepositions_url = "/vehiclepositions_pb.json";
-  const response = await fetch(vehiclepositions_url);
+const statusBox = document.getElementById('status');
+
+function updateStatus() {
+  if (!lastRefresh) return;
+  const elapsed = Math.floor((Date.now() - lastRefresh) / 1000);
+  const remaining = Math.max(0, REFRESH_INTERVAL - elapsed);
+  const time = new Date(lastRefresh).toLocaleTimeString();
+  statusBox.textContent = `Last refresh: ${time} · Next in ${remaining}s`;
+}
+
+async function refreshPoints() {
+  const response = await fetch("/vehiclepositions_pb.json");
   const vehiclepositions = await response.json();
 
-  const features = vehiclepositions.entity.map(vehicleposition => {
+  const newLayer = L.layerGroup();
+
+  vehiclepositions.entity.forEach(vehicleposition => {
     const pos = vehicleposition.vehicle.position;
     const route_id = vehicleposition.vehicle.trip.route_id;
     const trip_id = vehicleposition.vehicle.trip.trip_id;
     const direction_id = vehicleposition.vehicle.trip.direction_id;
     const route = routes[route_id];
     const trip = trips[trip_id][direction_id];
-    return new Feature({
-      geometry: new Point(fromLonLat([pos.longitude, pos.latitude])),
-      name: route["route_short_name"] + " - " + route["route_desc"] + "\n" + trip["trip_headsign"]
-    })
+    const label = route["route_short_name"] + " - " + route["route_desc"] + "\n" + trip["trip_headsign"];
+    const isRapidRide = /^[A-Z] Line$/.test(route["route_short_name"]);
+
+    const routeNum = route["route_short_name"]?.replace(" Line", "") || "";
+    const icon = L.divIcon({
+      className: isRapidRide ? 'route-icon rapidride' : 'route-icon',
+      html: `<span>${routeNum}</span>`,
+      iconSize: [26, 26],
+      iconAnchor: [13, 13],
+    });
+
+    L.marker([pos.latitude, pos.longitude], { icon })
+      .bindTooltip(label)
+      .addTo(newLayer);
   });
 
-  source.addFeatures(features);
+  if (markersLayer) {
+    map.removeLayer(markersLayer);
+  }
+  markersLayer = newLayer;
+  markersLayer.addTo(map);
 
-  return new WebGLPointsLayer({
-        source: source,
-        style: {
-          symbol: {
-            symbolType: 'circle',
-            size: 14,
-            color: 'rgb(255, 0, 0)',
-            opacity: 1,
-          },
-        }
-      });
+  lastRefresh = Date.now();
+  updateStatus();
 }
 
-async function refreshPoints() {
-  const newPointsLayer = await generatePointsLayer();
-
-  if (pointsLayer) {
-    map.removeLayer(pointsLayer);
-  }
-
-  pointsLayer = newPointsLayer;
-  map.addLayer(pointsLayer);
-
-}
-
-const info = document.getElementById('info');
-
-let currentFeature;
-const displayFeatureInfo = function (pixel, feature) {
-  if (feature) {
-    info.style.left = pixel[0] + 'px';
-    info.style.top = pixel[1] + 'px';
-    info.style.visibility = 'visible';
-    info.innerText = feature.get('name');
-  } else {
-    info.style.visibility = 'hidden';
-  }
-  currentFeature = feature;
-};
-
-
-let selected = null;
 async function initializeMap() {
-  map = new Map({
-    target: 'map',
-    layers: [
-      new TileLayer({
-        source: new OSM()
-      })
-    ],
-    view: new View({
-      center: [0, 0],
-      zoom: 2
-    })
-  });
+  map = L.map('map').setView([47.6062, -122.3321], 11);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  }).addTo(map);
 
   routes = await fetchRoutes();
   trips = await fetchTrips();
 
   refreshPoints();
-
-  setInterval(refreshPoints, 10000);
-
-  map.on('pointermove', function (ev) {
-    if (selected !== null) {
-      selected.set('hover', 0);
-      info.style.visibility = 'hidden';
-      selected = null;
-    }
-
-    map.forEachFeatureAtPixel(ev.pixel, function (feature) {
-      feature.set('hover', 1);
-      selected = feature;
-      return true;
-    });
-
-    displayFeatureInfo(ev.pixel, selected);
-  });
+  setInterval(refreshPoints, REFRESH_INTERVAL * 1000);
+  setInterval(updateStatus, 1000);
 }
 
 initializeMap();
