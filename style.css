@@ -35,6 +35,52 @@ html, body {
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
+.timetable-popup {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 13px;
+}
+.tt-header {
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.tt-scroll {
+  max-height: 250px;
+  overflow-y: auto;
+}
+.tt-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tt-scroll tr td {
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+.tt-time {
+  color: #555;
+  padding-right: 8px;
+}
+.stop-previous {
+  background: #e3f2fd;
+  font-weight: 600;
+}
+.stop-previous td:first-child::before {
+  content: "✓ ";
+}
+.stop-next {
+  background: #fff3e0;
+  font-weight: 600;
+}
+.stop-next td:first-child::before {
+  content: "▸ ";
+}
+.stop-current {
+  background: #c8e6c9;
+  font-weight: 700;
+}
+.stop-current td:first-child::before {
+  content: "● ";
+}
 #status {
   position: absolute;
   top: 10px;
